@@ -60,6 +60,7 @@ class Game:
         self.background, r = load_image("backdrop.png")
         
         self.missile = Mesiac2(self.trail_screen)
+        self.missile = Mesiac3()
         self.missilesprite = pygame.sprite.RenderPlain((self.missile))
 
         self.lock = thread.allocate_lock()
@@ -77,12 +78,25 @@ class Game:
         planetlist = None
 
         self.particlesystem = pygame.sprite.RenderPlain()
+        self.mesiacovysystem = pygame.sprite.RenderPlain()
         self.planetsprites = self.create_planets(planetlist)
         
         self.trail_screen.fill((0, 0, 0))
             
         #self.show_planets = 100
 
+    def create_mesiacovysystem(self, pos, size):
+        self.mesiacovysystem.add(Particle(pos, size))
+
+
+    def create_particlesystem(self, pos, n, size):
+        if Settings.PARTICLES:
+            if Settings.BOUNCE:
+                nn = n / 2
+            else:
+                nn = n
+            for i in xrange(nn):
+                self.particlesystem.add(Particle(pos, size))
 
     def create_planets(self, planetlist=None):
         result = pygame.sprite.RenderPlain()
@@ -110,6 +124,11 @@ class Game:
 
 
     def fire(self):
+        self.missile.launch()
+        pygame.key.set_repeat()
+        #self.end_shot()
+    
+    def fire2(self):
         self.missile.launch()
         pygame.key.set_repeat()
         #self.end_shot()
@@ -161,8 +180,8 @@ class Game:
 #        self.players[1].draw(self.screen)
 #        self.players[2].draw(self.screen)
 #        print self.particlesystem
-        #if Settings.PARTICLES:
-        #    self.particlesystem.draw(self.screen)
+        if Settings.PARTICLES:
+            self.particlesystem.draw(self.screen)
         #if self.firing:
         #    if self.missile.visible():
         #        self.missilesprite.draw(self.screen)
@@ -176,6 +195,9 @@ class Game:
         #if self.firing:
         #    self.missile.draw_status(self.screen)
 
+        self.particlesystem.draw(self.screen)
+        self.mesiacovysystem.draw(self.screen)
+
         if self.missile.visible():
             self.missilesprite.draw(self.screen)
         if not self.missile.visible():
@@ -184,8 +206,37 @@ class Game:
         pygame.display.flip()
 
 
+    def update_particles(self):
+        if Settings.PARTICLES:
+            for p in self.particlesystem:
+    #            print p.get_pos()
+                if p.update(self.planetsprites) == 0 or p.flight < 0:
+                    if p.flight >= 0 and p.in_range():
+                        if p.get_size() == 10:
+                            self.create_particlesystem(p.get_impact_pos(), Settings.n_PARTICLES_5, 5)
+    #                print "removing: ", p.get_pos()
+                    self.particlesystem.remove(p)
+                if p.flight > Settings.MAX_FLIGHT:
+                    self.particlesystem.remove(p)
+
+    def update_mesiace(self):
+        if Settings.PARTICLES:
+            for p in self.mesiacovysystem:
+    #            print p.get_pos()
+                if p.update(self.planetsprites) == 0 or p.flight < 0:
+                    if p.flight >= 0 and p.in_range():
+                        if p.get_size() == 10:
+                            self.create_particlesystem(p.get_impact_pos(), Settings.n_PARTICLES_5, 5)
+    #                print "removing: ", p.get_pos()
+                    self.mesiacovysystem.remove(p)
+                if p.flight > Settings.MAX_FLIGHT:
+                    self.mesiacovysystem.remove(p)
+
+
+
     def update(self):
-        #self.update_particles()
+        self.update_particles()
+        self.update_mesiace()
         #self.firing = self.missile.update(self.planetsprites, self.players)
         self.cotrafil = self.missile.update(self.planetsprites)
         print("cotrafil", self.cotrafil)
@@ -197,7 +248,7 @@ class Game:
             # Don't create any particles when we hit a black
             # hole, the missile got sucked up.
             if self.cotrafil == 0 and self.missile.visible():
-                #self.create_particlesystem(self.missile.get_impact_pos(), Settings.n_PARTICLES_10, 10e20)
+                self.create_particlesystem(self.missile.get_impact_pos(), Settings.n_PARTICLES_10, 10e20)
                 ()
             #self.end_shot()
 
@@ -214,7 +265,12 @@ class Game:
 
 
     def run(self):
-        self.fire()
+        #self.fire()
+        self.missilei = Mesiac2(self.trail_screen)
+        #self.mesiacovysystem.add(Mesiac2(self.trail_screen).launch())
+        self.mesiacovysystem.add(Particle((100,100), 20))
+        #self.particlesystem.add(Particle((100,100), 20))
+        #create_particlesystem(self, pos, n, size):
         while True:    
             self.clock.tick(Settings.FPS)
             #print clock.get_fps()
@@ -223,7 +279,11 @@ class Game:
                 if event.type == KEYDOWN:
                     if event.key == K_SPACE:
                         print("hovno")
-                        self.fire()
+                        #self.fire()
+                        #self.mesiacovysystem.add(Particle((100,100), 20))
+                        self.mesiacovysystem.add(Mesiac3())
+                        #self.particlesystem.add(Particle((100,100), 20))
+                        #self.mesiacovysystem.add(Mesiac2(self.trail_screen).launch())
 
             #if pygame.key.get_pressed()[K_SPACE]:
             #    self.fire()
