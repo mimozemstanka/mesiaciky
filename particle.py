@@ -345,11 +345,15 @@ class Mesiac3(Particle):
         self.rect = self.orig.get_rect()
         #self.rect.center = self.pos
 
-    def launch(self):
+    def launch(self, player):
         self.flight = Settings.MAX_FLIGHT
-        self.pos = (100, 100)
-        speed = 200
-        angle = math.radians(90)
+        #self.pos = (100, 100)
+        #speed = 200
+        #angle = math.radians(90)
+        self.pos = player.get_launchpoint()
+        speed = player.get_power()
+        angle = player.get_angle()
+        print("angle:", angle)
         self.v = (0.1 * speed * math.sin(angle), -0.1 * speed * math.cos(angle))
         print('dalsi mesiacik launched, power', speed)
         print('pos', self.pos)

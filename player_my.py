@@ -10,7 +10,7 @@ from general import *
 
 class Player(pygame.sprite.Sprite):
     
-    def __init__(self, coord, angle, power=100):
+    def __init__(self):
         pygame.sprite.Sprite.__init__(self) #call Sprite intializer
         self.init()
         
@@ -49,10 +49,11 @@ class Player(pygame.sprite.Sprite):
         return self.power
 
     def get_launchpoint(self):
-        return coord
+        return self.coord
     
     def draw_line(self, screen):
         ''' Draws the aiming line out of the ship's gun. '''
         (sx,sy) = self.get_launchpoint()
+        self.color = (209,170,133)
         pygame.draw.aaline(screen, self.color, (sx,sy), (sx + self.power * math.sin(math.radians(self.angle)), sy - self.power * math.cos(math.radians(self.angle))))
 

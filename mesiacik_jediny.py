@@ -59,6 +59,9 @@ class Game:
 
         self.background, r = load_image("backdrop.png")
         
+        self.nina = Player()
+        self.nina.init(coord=(100, 100))
+
         self.missile = Mesiac2(self.trail_screen)
         self.missile = Mesiac3()
         self.missilesprite = pygame.sprite.RenderPlain((self.missile))
@@ -203,6 +206,8 @@ class Game:
         if not self.missile.visible():
             self.draw_zoom()
 
+        self.nina.draw_line(self.screen)
+
         pygame.display.flip()
 
 
@@ -282,10 +287,21 @@ class Game:
                         #self.fire()
                         aa=Mesiac3()
                         self.mesiacovysystem.add(aa)
-                        aa.launch()
+                        aa.launch(self.nina)
                         #self.mesiacovysystem.add(Mesiac3())
                         #self.particlesystem.add(Particle((100,100), 20))
                         #self.mesiacovysystem.add(Mesiac2(self.trail_screen).launch())
+                    a=5
+                    p=25
+                    if event.key == K_UP:
+                        self.nina.change_power(p)
+                    elif event.key == K_DOWN:
+                        self.nina.change_power(-p)
+                    elif event.key == K_LEFT:
+                        self.nina.change_angle(-a)
+                    elif event.key == K_RIGHT:
+                        self.nina.change_angle(a)
+
 
             #if pygame.key.get_pressed()[K_SPACE]:
             #    self.fire()
