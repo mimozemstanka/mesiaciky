@@ -336,7 +336,7 @@ class Mesiac3(Particle):
 
 
         #s = randint(3, 10)/10.
-        s = randint(5, 30) # size
+        s = randint(15, 30) # size
         self.s = s
         self.orig = pygame.transform.scale(self.image, (s, s))
 
@@ -348,8 +348,8 @@ class Mesiac3(Particle):
     def launch(self):
         self.flight = Settings.MAX_FLIGHT
         self.pos = (100, 100)
-        speed = 80
-        angle = math.radians(180)
+        speed = 200
+        angle = math.radians(90)
         self.v = (0.1 * speed * math.sin(angle), -0.1 * speed * math.cos(angle))
         print('dalsi mesiacik launched, power', speed)
         print('pos', self.pos)

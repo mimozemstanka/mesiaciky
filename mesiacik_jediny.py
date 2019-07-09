@@ -12,7 +12,7 @@ from random import randint
 
 from settings import *
 from general import *
-from player import *
+from player_my import *
 from planet import *
 from particle import *
 from menu import *
@@ -266,9 +266,9 @@ class Game:
 
     def run(self):
         #self.fire()
-        self.missilei = Mesiac2(self.trail_screen)
+        #self.missilei = Mesiac2(self.trail_screen)
         #self.mesiacovysystem.add(Mesiac2(self.trail_screen).launch())
-        self.mesiacovysystem.add(Particle((100,100), 20))
+        #self.mesiacovysystem.add(Particle((100,100), 20))
         #self.particlesystem.add(Particle((100,100), 20))
         #create_particlesystem(self, pos, n, size):
         while True:    
@@ -280,8 +280,10 @@ class Game:
                     if event.key == K_SPACE:
                         print("hovno")
                         #self.fire()
-                        #self.mesiacovysystem.add(Particle((100,100), 20))
-                        self.mesiacovysystem.add(Mesiac3())
+                        aa=Mesiac3()
+                        self.mesiacovysystem.add(aa)
+                        aa.launch()
+                        #self.mesiacovysystem.add(Mesiac3())
                         #self.particlesystem.add(Particle((100,100), 20))
                         #self.mesiacovysystem.add(Mesiac2(self.trail_screen).launch())
 
