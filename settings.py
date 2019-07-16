@@ -28,7 +28,7 @@ class Settings:
 
         VERSION = '0.9'
 
-	g = 120 # gravity
+	g = 30 # gravity
 	MAXPOWER = 350
 	PLANET_SHIP_DISTANCE = 75 # this is actually the distance towards the edge left and right
 	PLANET_EDGE_DISTANCE = 50 # upper and lower edge
@@ -49,9 +49,9 @@ class Settings:
 	RANDOM = False
 	POWER = 200
 
-	MAX_FLIGHT = 750
+	MAX_FLIGHT = 50
 
-	MAX_PLANETS = 1
+	MAX_PLANETS = 3
         MAX_BLACKHOLES = 0
 
 	HITSCORE = 1500
@@ -72,5 +72,6 @@ class Settings:
 	MAX_ROUNDS = 0
 
         DATA_PATH = os.path.join(os.path.dirname(__file__), 'data/')
+        #DATA_PATH = os.path.join(os.path.dirname(__file__), './data/')
 
         FULLSCREEN = False

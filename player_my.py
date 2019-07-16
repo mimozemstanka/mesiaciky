@@ -14,7 +14,7 @@ class Player(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self) #call Sprite intializer
         self.init()
         
-    def init(self, coord=(0, 0), angle=(90), power=100):
+    def init(self, coord=(0, 0), angle=90, power=100):
         self.coord = coord
         self.angle = angle
         self.power = power
@@ -41,6 +41,9 @@ class Player(pygame.sprite.Sprite):
                 self.power = 0
             if self.power > Settings.MAXPOWER:
                 self.power = Settings.MAXPOWER
+    
+    #def set_mesiacsize(self, mesiacsize):
+    #    self.mesiacsize = mesiacsize
 
     def get_angle(self):
         return self.angle
@@ -50,6 +53,9 @@ class Player(pygame.sprite.Sprite):
 
     def get_launchpoint(self):
         return self.coord
+
+    #def get_mesiacsize(self):
+    #    return self.mesiacsize
     
     def draw_line(self, screen):
         ''' Draws the aiming line out of the ship's gun. '''

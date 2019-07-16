@@ -34,6 +34,8 @@ class Particle(pygame.sprite.Sprite):
     def __init__(self, pos = (0.0, 0.0), size = 10):
         ''' Initialize the particle. '''
         pygame.sprite.Sprite.__init__(self)
+        Settings.particle_image10, Settings.particle_image10_rect = load_image("explosion-10.png", (0,0,0))
+        Settings.particle_image5, Settings.particle_image5_rect = load_image("explosion-5.png", (0,0,0))
         if size == 5:
             self.image = Settings.particle_image5
         else:
@@ -140,7 +142,8 @@ class Particle(pygame.sprite.Sprite):
         return 1
 
     def in_range(self):
-        if pygame.Rect(-800, -600, 2400, 1800).collidepoint(self.pos):
+        #if pygame.Rect(-800, -600, 2400, 1800).collidepoint(self.pos):
+        if pygame.Rect(-800, -600, 3000, 2100).collidepoint(self.pos):
         #if pygame.Rect(00, 00, 800, 600).collidepoint(self.pos):
             return True
         else:
@@ -346,13 +349,13 @@ class Mesiac3(Particle):
         #self.rect.center = self.pos
 
     def launch(self, player):
-        self.flight = Settings.MAX_FLIGHT
         #self.pos = (100, 100)
         #speed = 200
         #angle = math.radians(90)
         self.pos = player.get_launchpoint()
         speed = player.get_power()
         angle = player.get_angle()
+        angle = math.radians(angle)
         print("angle:", angle)
         self.v = (0.1 * speed * math.sin(angle), -0.1 * speed * math.cos(angle))
         print('dalsi mesiacik launched, power', speed)

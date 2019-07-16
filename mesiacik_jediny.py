@@ -19,6 +19,8 @@ from menu import *
 from network import *
 from inputbox import *
 
+from kreslenie import *
+
 class Game:
 
     particle_image = None
@@ -35,13 +37,17 @@ class Game:
 
         self.clock = pygame.time.Clock()
 
-        self.screen = pygame.display.set_mode((800, 600))
+        self.screen = pygame.display.set_mode((1000, 700))
         icon, rect = load_image("icon64x64.png", (0,0,0))
         pygame.display.set_icon(icon)
         pygame.display.set_caption('Mesiacik jediny')
+
+        pygame.mixer.init()
+        pygame.mixer.music.load('data/vysehrad.mp3')
+        pygame.mixer.music.play(-1)
         
-        Settings.particle_image10, Settings.particle_image10_rect = load_image("explosion-10.png", (0,0,0))
-        Settings.particle_image5, Settings.particle_image5_rect = load_image("explosion-5.png", (0,0,0))
+        #Settings.particle_image10, Settings.particle_image10_rect = load_image("explosion-10.png", (0,0,0))
+        #Settings.particle_image5, Settings.particle_image5_rect = load_image("explosion-5.png", (0,0,0))
         
         self.trail_screen = pygame.Surface(self.screen.get_size())
         self.trail_screen = self.trail_screen.convert()
@@ -60,11 +66,11 @@ class Game:
         self.background, r = load_image("backdrop.png")
         
         self.nina = Player()
-        self.nina.init(coord=(100, 100))
+        self.nina.init(coord=(200, 200))
 
-        self.missile = Mesiac2(self.trail_screen)
-        self.missile = Mesiac3()
-        self.missilesprite = pygame.sprite.RenderPlain((self.missile))
+        #self.missile = Mesiac2(self.trail_screen)
+        #self.missile = Mesiac3()
+        #self.missilesprite = pygame.sprite.RenderPlain((self.missile))
 
         self.lock = thread.allocate_lock()
 
@@ -83,6 +89,7 @@ class Game:
         self.particlesystem = pygame.sprite.RenderPlain()
         self.mesiacovysystem = pygame.sprite.RenderPlain()
         self.planetsprites = self.create_planets(planetlist)
+        self.vykresleniesprites = pygame.sprite.RenderPlain()
         
         self.trail_screen.fill((0, 0, 0))
             
@@ -137,39 +144,12 @@ class Game:
         #self.end_shot()
 
     
-    def draw_zoom(self):
-        normal_screen = pygame.Surface((800, 600))
-        normal_screen.set_colorkey((0,0,0))
-        normal_screen.convert_alpha()
-        #self.playersprites.draw(normal_screen)
-        if not Settings.INVISIBLE:
-            self.planetsprites.draw(normal_screen)
-
-        zoom_screen = pygame.Surface((600, 450))
-        zoom_screen.set_colorkey((0,0,0))
-        zoom_screen.convert_alpha()
-
-        background = pygame.transform.scale(self.background, (600,450))
-        zoom_screen.blit(self.background, (0,0))
-        normal_screen = pygame.transform.scale(normal_screen, (200,150))
-        zoom_screen.blit(normal_screen, (200,150))
-
-        missilesprite = self.missile.get_image()
-        missilesprite = pygame.transform.scale(missilesprite, (missilesprite.get_size()[0] / 3, missilesprite.get_size()[1] / 3))
-        pos = self.missile.get_pos()
-        pos = (200 + pos[0] / 4 - missilesprite.get_width() / 2, 150 + pos[1] / 4- missilesprite.get_height() / 2)
-        zoom_screen.blit(missilesprite, pos)
-
-        pygame.draw.rect(zoom_screen, (255,255,255), pygame.Rect(0, 0, 600, 450), 1)
-        pygame.draw.rect(zoom_screen, (150,150,150), pygame.Rect(200, 150, 200, 150), 1)
-        #self.screen.blit(self.dim_screen, (0,0))
-        #self.screen.blit(zoom_screen, (100, 75))
 
     def draw(self):
         self.screen.blit(self.background, (0, 0))
 
         if Settings.BOUNCE:
-            pygame.draw.rect(self.screen, (self.bounce_count, 0, 0), pygame.Rect(0, 0, 800, 600), 1)
+            pygame.draw.rect(self.screen, (self.bounce_count, 0, 0), pygame.Rect(0, 0, 1000, 700), 1)
 
         show_planets = False
         if not Settings.INVISIBLE:
@@ -201,10 +181,17 @@ class Game:
         self.particlesystem.draw(self.screen)
         self.mesiacovysystem.draw(self.screen)
 
-        if self.missile.visible():
-            self.missilesprite.draw(self.screen)
-        if not self.missile.visible():
-            self.draw_zoom()
+        #if self.missile.visible():
+        #    self.missilesprite.draw(self.screen)
+        #if not self.missile.visible():
+        #    self.draw_zoom()
+
+        obr_nina()
+        self.vykresleniesprites.add(obr_nina())
+        self.vykresleniesprites.draw(self.screen)
+
+        aa = pygame.image.load('data/nina.png')
+        #self.screen.blit(aa, (300, 300))
 
         self.nina.draw_line(self.screen)
 
@@ -228,33 +215,30 @@ class Game:
         if Settings.PARTICLES:
             for p in self.mesiacovysystem:
     #            print p.get_pos()
-                if p.update(self.planetsprites) == 0 or p.flight < 0:
+                if p.update(self.planetsprites) == 0:
                     if p.flight >= 0 and p.in_range():
                         if p.get_size() == 10:
                             self.create_particlesystem(p.get_impact_pos(), Settings.n_PARTICLES_5, 5)
     #                print "removing: ", p.get_pos()
                     self.mesiacovysystem.remove(p)
-                if p.flight > Settings.MAX_FLIGHT:
-                    self.mesiacovysystem.remove(p)
-
 
 
     def update(self):
         self.update_particles()
         self.update_mesiace()
         #self.firing = self.missile.update(self.planetsprites, self.players)
-        self.cotrafil = self.missile.update(self.planetsprites)
-        print("cotrafil", self.cotrafil)
+        #self.cotrafil = self.missile.update(self.planetsprites)
+        #print("cotrafil", self.cotrafil)
         #if self.firing <= 0:
-        if self.cotrafil <= 0:
+        #if self.cotrafil <= 0:
             # Collision between missile and planet (0) or
             # a black hole (-1).
             #
             # Don't create any particles when we hit a black
             # hole, the missile got sucked up.
-            if self.cotrafil == 0 and self.missile.visible():
-                self.create_particlesystem(self.missile.get_impact_pos(), Settings.n_PARTICLES_10, 10e20)
-                ()
+        #    if self.cotrafil == 0 and self.missile.visible():
+        #        self.create_particlesystem(self.missile.get_impact_pos(), Settings.n_PARTICLES_10, 10e20)
+        #        ()
             #self.end_shot()
 
 
@@ -291,8 +275,8 @@ class Game:
                         #self.mesiacovysystem.add(Mesiac3())
                         #self.particlesystem.add(Particle((100,100), 20))
                         #self.mesiacovysystem.add(Mesiac2(self.trail_screen).launch())
-                    a=5
-                    p=25
+                    a=2
+                    p=5
                     if event.key == K_UP:
                         self.nina.change_power(p)
                     elif event.key == K_DOWN:
@@ -302,6 +286,10 @@ class Game:
                     elif event.key == K_RIGHT:
                         self.nina.change_angle(a)
 
+                    if event.key == K_n:
+                        planetlist = None
+                        self.planetsprites = self.create_planets(planetlist)
+
 
             #if pygame.key.get_pressed()[K_SPACE]:
             #    self.fire()
@@ -310,97 +298,6 @@ class Game:
             #    if event.key == K_RETURN or event.key == K_SPACE:
             #        self.fire()
             
-            '''
-            for event in self.event_check():
-                if event.type == QUIT:
-                    self.q = True
-                elif event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        self.toggle_menu()
-
-                    if (not self.net_play() or self.active_net_player()):
-                        if event.mod == KMOD_CTRL or event.mod == KMOD_LCTRL or event.mod == KMOD_RCTRL \
-                            or event.mod == 4160 or event.mod == 4224:
-                            p = 1
-                            a = 0.25
-                        elif event.mod == KMOD_SHIFT or event.mod == KMOD_LSHIFT or event.mod == KMOD_RSHIFT \
-                            or event.mod == 4097 or event.mod == 4098:
-                            p = 25
-                            a = 5
-                        elif event.mod == KMOD_ALT or event.mod == KMOD_LALT or event.mod == KMOD_RALT \
-                            or event.mod == 4352 or event.mod == 20480 or event.mod == 4608:
-                            p = 0.2
-                            a = 0.05
-                        else:
-                            p = 10
-                            a = 2
-
-                        if not self.round_over:
-                            if event.key == K_UP:
-                                self.change_power(p)
-                            elif event.key == K_DOWN:
-                                self.change_power(-p)
-                            elif event.key == K_LEFT:
-                                self.change_angle(-a)
-                            elif event.key == K_RIGHT:
-                                self.change_angle(a)
-
-                        if event.key == K_RETURN or event.key == K_SPACE:
-                            if self.net_play():
-                                if self.net.send((self.players[self.player].get_angle(),
-                                    self.players[self.player].get_power(), True)) == False:
-                                    self.net.close()
-                            self.fire()
-                        else:
-                            if self.net_play():
-                                if self.net.send((self.players[self.player].get_angle(),
-                                    self.players[self.player].get_power(), False)) == False:
-                                    self.net.close()
-
-                    self.q = True
-                elif event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        self.toggle_menu()
-
-                    if (not self.net_play() or self.active_net_player()):
-                        if event.mod == KMOD_CTRL or event.mod == KMOD_LCTRL or event.mod == KMOD_RCTRL \
-                            or event.mod == 4160 or event.mod == 4224:
-                            p = 1
-                            a = 0.25
-                        elif event.mod == KMOD_SHIFT or event.mod == KMOD_LSHIFT or event.mod == KMOD_RSHIFT \
-                            or event.mod == 4097 or event.mod == 4098:
-                            p = 25
-                            a = 5
-                        elif event.mod == KMOD_ALT or event.mod == KMOD_LALT or event.mod == KMOD_RALT \
-                            or event.mod == 4352 or event.mod == 20480 or event.mod == 4608:
-                            p = 0.2
-                            a = 0.05
-                        else:
-                            p = 10
-                            a = 2
-
-                        if not self.round_over:
-                            if event.key == K_UP:
-                                self.change_power(p)
-                            elif event.key == K_DOWN:
-                                self.change_power(-p)
-                            elif event.key == K_LEFT:
-                                self.change_angle(-a)
-                            elif event.key == K_RIGHT:
-                                self.change_angle(a)
-
-                        if event.key == K_RETURN or event.key == K_SPACE:
-                            if self.net_play():
-                                if self.net.send((self.players[self.player].get_angle(),
-                                    self.players[self.player].get_power(), True)) == False:
-                                    self.net.close()
-                            self.fire()
-                        else:
-                            if self.net_play():
-                                if self.net.send((self.players[self.player].get_angle(),
-                                    self.players[self.player].get_power(), False)) == False:
-                                    self.net.close()
-                        '''
 
             
             #self.lock.acquire()
